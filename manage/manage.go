@@ -108,16 +108,16 @@ func (m *Manager) Auth() (string, error) {
 	if len(parts) < 3 {
 		return "", fmt.Errorf("Unparsable response from lightbulb: %s", response)
 	}
-	if parts[2] != "HF-LPB100-ZJ200" {
-		return "", fmt.Errorf("Unknown firmware version: %s", parts[2])
-	}
+	//if parts[2] != "HF-LPB100-ZJ200" {
+	//	return "", fmt.Errorf("Unknown firmware version: %s", parts[2])
+	//}
 	response, err = m.ReliableRequestReceive("+ok")
-	if err != nil {
-		return "", err
-	}
-	if response != "+ERR=-1\n\n" {
-		return "", fmt.Errorf("Unexpected response to +ok: %x", response)
-	}
+//	if err != nil {
+//		return "", err
+//	}
+	//if response != "+ERR=-1\n\n" {
+//		return "", fmt.Errorf("Unexpected response to +ok: %x", response)
+//	}
 	return parts[1], nil
 }
 
@@ -151,11 +151,11 @@ func (m *Manager) GetWSInfo() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	ssid, err := m.ReliableRequestReceive("AT+WSSSID\n")
+	ssid, err := m.ReliableRequestReceive("AT+WSSSID\r")
 	if err != nil {
 		return "", "", err
 	}
-	password, err := m.ReliableRequestReceive("AT+WSKEY\n")
+	password, err := m.ReliableRequestReceive("AT+WSKEY\r")
 	if err != nil {
 		return "", "", err
 	}
@@ -260,10 +260,8 @@ func (m *Manager) Shell() error {
 	consolereader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("> ")
-		input, err := consolereader.ReadString('\n')
-		if err != nil {
-			return err
-		}
+		input, _ := consolereader.ReadString('\n')
+		input = strings.TrimSuffix(input, "\n")
 		input = input + "\r"
 		fmt.Println(input)
 		err = m.RequestRaw(input)
